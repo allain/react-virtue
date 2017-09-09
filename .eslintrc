@@ -1,0 +1,18 @@
+{
+    "extends": "prettier-standard",
+    "env": {
+        "browser": true,
+        "jest": true
+    },
+    "plugins": [
+        "babel",
+        "react"
+    ],
+    "rules": {
+        "eqeqeq": [
+            "error",
+            "smart"
+        ],
+        "react/jsx-uses-vars": "error"
+    }
+}
