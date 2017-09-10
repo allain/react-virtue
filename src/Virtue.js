@@ -11,17 +11,14 @@ class Virtue extends React.Component {
       rowHeights: {},
       windowPosition: 0
     }
-
-    window.v = this
   }
 
   componentDidMount() {
-    //    setTimeout(() => {
     let startPosition = this._estimatePosition(this.state.scrollIndex)
     this.list.scrollTop = startPosition
-
-    this.listenScrollEvent()
-    //   }, 25)
+    this.setState({
+      windowPosition: startPosition
+    })
 
     this.list.addEventListener('scroll', this.listenScrollEvent.bind(this))
   }
@@ -31,14 +28,12 @@ class Virtue extends React.Component {
   }
 
   listenScrollEvent(event) {
-    let scrollIndex = this.estimateScrollIndex(this.list.scrollTop)
-    let newWindowPos = this._estimatePosition(scrollIndex)
+    const scrollIndex = this._estimateScrollIndex(this.list.scrollTop)
 
-    this.setState(oldState => ({
-      ...oldState,
+    this.setState({
       scrollIndex,
-      windowPosition: newWindowPos
-    }))
+      windowPosition: this._estimatePosition(scrollIndex)
+    })
   }
 
   render() {
@@ -77,7 +72,6 @@ class Virtue extends React.Component {
             style={{
               position: 'relative',
               top: this.state.windowPosition
-              // pointerEvents: 'none'
             }}>
             {rows}
           </div>
@@ -87,13 +81,11 @@ class Virtue extends React.Component {
   }
 
   _renderRow(index) {
-    const { rowRenderer } = this.props
-
     return (
       <ReactHeight
         key={`row-${index}`}
         onHeightReady={height => this._updateRowHeight(index, height)}>
-        {rowRenderer(index)}
+        {this.props.rowRenderer(index)}
       </ReactHeight>
     )
   }
@@ -119,7 +111,7 @@ class Virtue extends React.Component {
     )
   }
 
-  estimateScrollIndex(scrollTop) {
+  _estimateScrollIndex(scrollTop) {
     const defaultHeight = this.estimateAvgRowHeight()
     let { rowHeights } = this.state
 
@@ -139,9 +131,7 @@ class Virtue extends React.Component {
     let heights = Object.values(this.state.rowHeights)
     if (heights.length === 0) return this.props.defaultHeight
 
-    return Math.round(
-      heights.reduce((total, height) => total + height, 0) / heights.length
-    )
+    return Math.round(heights.reduce((sum, h) => sum + h, 0) / heights.length)
   }
 
   _updateRowHeight(index, height) {

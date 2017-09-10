@@ -4,7 +4,7 @@ const Virtue = require('..')
 
 ReactDOM.render(
   <Virtue
-    rowCount={1000}
+    rowCount={500}
     height={window.innerHeight}
     defaultHeight={77}
     scrollIndex={200}
