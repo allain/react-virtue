@@ -8,16 +8,20 @@ class Virtue extends React.Component {
 
     this.state = {
       scrollIndex: props.scrollIndex || 0,
-      rowInfo: {}
+      rowHeights: {},
+      windowPosition: 0
     }
+
+    window.v = this
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      let heightBefore = this.estimateHeightBefore(this.state.scrollIndex)
-      this.list.scrollTop = heightBefore
-      this.listenScrollEvent()
-    }, 25)
+    //    setTimeout(() => {
+    let startPosition = this._estimatePosition(this.state.scrollIndex)
+    this.list.scrollTop = startPosition
+
+    this.listenScrollEvent()
+    //   }, 25)
 
     this.list.addEventListener('scroll', this.listenScrollEvent.bind(this))
   }
@@ -28,10 +32,13 @@ class Virtue extends React.Component {
 
   listenScrollEvent(event) {
     let scrollIndex = this.estimateScrollIndex(this.list.scrollTop)
+    let newWindowPos = this._estimatePosition(scrollIndex)
 
-    if (scrollIndex !== this.state.scrollIndex) {
-      this.setState(oldState => ({ ...oldState, scrollIndex }))
-    }
+    this.setState(oldState => ({
+      ...oldState,
+      scrollIndex,
+      windowPosition: newWindowPos
+    }))
   }
 
   render() {
@@ -42,7 +49,8 @@ class Virtue extends React.Component {
       style = {},
       ...otherProps
     } = this.props
-    const { scrollIndex } = this.state
+
+    const { scrollIndex, rowHeights } = this.state
 
     delete otherProps.scrollIndex
     delete otherProps.defaultHeight
@@ -50,90 +58,35 @@ class Virtue extends React.Component {
     style.height = height + 'px'
     style.overflowY = 'scroll'
 
-    let heightBefore = this.estimateHeightBefore(scrollIndex)
-    let heightAfter = this.estimateHeightAfter(scrollIndex)
-
-    const before = heightBefore ? (
-      <div key="before" style={{ height: heightBefore }} />
-    ) : null
-    const after = heightAfter ? (
-      <div key="after" style={{ height: heightAfter }} />
-    ) : null
-
+    let estimatedHeight = this._estimateHeight()
     const rows = []
-    for (let i = scrollIndex; i < scrollIndex + 20; i++) {
-      rows.push(this.renderRow(i))
-    }
+    const scrollTop = this.list ? this.list.scrollTop : 0
+
+    const estimatedRowHeight = this.estimateAvgRowHeight()
+    let currentPos = this.state.windowPosition
+    let currentIndex = scrollIndex
+    do {
+      rows.push(this._renderRow(currentIndex, currentPos))
+      currentPos += rowHeights[currentIndex++] || estimatedRowHeight
+    } while (currentPos < scrollTop + height)
 
     return (
       <div ref={list => (this.list = list)} {...otherProps} style={style}>
-        {before}
-        {rows}
-        {after}
+        <div style={{ height: estimatedHeight }}>
+          <div
+            style={{
+              position: 'relative',
+              top: this.state.windowPosition
+              // pointerEvents: 'none'
+            }}>
+            {rows}
+          </div>
+        </div>
       </div>
     )
   }
 
-  estimateHeightBefore(scrollIndex) {
-    const defaultHeight = this.estimateAvgRowHeight()
-    if (scrollIndex === 0) return 0
-
-    let { rowInfo } = this.state
-
-    let computedIndexes = Object.keys(rowInfo).filter(i => i < scrollIndex)
-    let computedHeights = computedIndexes.reduce(
-      (total, index) => total + rowInfo[index].height,
-      0
-    )
-    return (
-      computedHeights + defaultHeight * (scrollIndex - computedIndexes.length)
-    )
-  }
-
-  estimateScrollIndex(scrollTop) {
-    const defaultHeight = this.estimateAvgRowHeight()
-    let { rowInfo } = this.state
-
-    let currentIndex = 0
-    let remainingHeight = scrollTop
-    do {
-      let currentRowInfo = rowInfo[currentIndex]
-      let rowHeight = currentRowInfo ? currentRowInfo.height : defaultHeight
-      if (rowHeight > remainingHeight) {
-        return currentIndex
-      }
-      currentIndex++
-      remainingHeight -= rowHeight
-    } while (true)
-  }
-
-  estimateAvgRowHeight() {
-    let heights = Object.values(this.state.rowInfo).map(i => i.height)
-    if (heights.length === 0) return this.props.defaultHeight
-
-    return Math.round(
-      heights.reduce((total, height) => total + height, 0) / heights.length
-    )
-  }
-
-  estimateHeightAfter(scrollIndex) {
-    let { rowInfo } = this.state
-
-    const defaultHeight = this.estimateAvgRowHeight()
-
-    let computedIndexes = Object.keys(rowInfo).filter(i => i > scrollIndex)
-    let computedHeights = computedIndexes.reduce(
-      (total, index) => total + rowInfo[index].height,
-      0
-    )
-    return (
-      computedHeights +
-      defaultHeight *
-        (this.props.rowCount - scrollIndex - computedIndexes.length)
-    )
-  }
-
-  renderRow(index) {
+  _renderRow(index, y) {
     const { rowRenderer } = this.props
 
     return (
@@ -145,14 +98,73 @@ class Virtue extends React.Component {
     )
   }
 
-  _updateRowHeight(index, height) {
-    this.setState(oldState => ({
-      ...oldState,
-      rowInfo: {
-        ...oldState.rowInfo,
-        [index]: { ...(oldState.rowInfo[index] || {}), height }
+  _estimateHeight() {
+    return this.estimateAvgRowHeight() * this.props.rowCount
+  }
+
+  _estimatePosition(scrollIndex) {
+    const defaultHeight = this.estimateAvgRowHeight()
+    let { rowHeights } = this.state
+
+    if (scrollIndex === 0) return 0
+
+    let computedIndexes = Object.keys(rowHeights).filter(i => i < scrollIndex)
+    let computedHeights = computedIndexes.reduce(
+      (total, index) => total + rowHeights[index],
+      0
+    )
+    return (
+      computedHeights +
+      Math.floor(defaultHeight * (scrollIndex - computedIndexes.length))
+    )
+  }
+
+  estimateScrollIndex(scrollTop) {
+    const defaultHeight = this.estimateAvgRowHeight()
+    let { rowHeights } = this.state
+
+    let currentIndex = 0
+    let remainingHeight = scrollTop
+    do {
+      let rowHeight = rowHeights[currentIndex] || defaultHeight
+      if (rowHeight > remainingHeight) {
+        return currentIndex
       }
-    }))
+      currentIndex++
+      remainingHeight -= rowHeight
+    } while (true)
+  }
+
+  estimateAvgRowHeight() {
+    let heights = Object.values(this.state.rowHeights)
+    if (heights.length === 0) return this.props.defaultHeight
+
+    return Math.round(
+      heights.reduce((total, height) => total + height, 0) / heights.length
+    )
+  }
+
+  _updateRowHeight(index, height) {
+    if (this.state.rowHeights[index] === height) return
+
+    let startAvg = this.estimateAvgRowHeight()
+    let lastScrollTop = this._estimatePosition(this.state.scrollIndex)
+    let deltaScroll = this.list.scrollTop - lastScrollTop
+    let emptyHeights = Object.keys(this.state.rowHeights).length === 0
+    this.setState(
+      oldState => ({
+        ...oldState,
+        rowHeights: {
+          ...oldState.rowHeights,
+          [index]: height
+        }
+      }),
+      () => {
+        let newScrollTop = this._estimatePosition(this.state.scrollIndex)
+        this.list.scrollTop =
+          newScrollTop + deltaScroll + (emptyHeights ? 0 : height - startAvg)
+      }
+    )
   }
 }
 

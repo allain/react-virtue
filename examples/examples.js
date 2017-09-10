@@ -4,11 +4,15 @@ const Virtue = require('..')
 
 ReactDOM.render(
   <Virtue
-    scrollIndex={100}
-    rowCount={10000}
-    height ={window.innerHeight}
+    rowCount={1000}
+    height={window.innerHeight}
     defaultHeight={77}
-    rowRenderer={(index) => <div>{index+1}. {Array(2+(index % 50)).join('word ')}</div>}
+    scrollIndex={200}
+    rowRenderer={index => (
+      <div>
+        {index + 1}. {Array(2 + index).join('w ')}
+      </div>
+    )}
   />,
   document.getElementById('root')
-);
+)
