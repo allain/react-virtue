@@ -66,7 +66,7 @@ class Virtue extends React.Component {
     let currentPos = this.state.windowPosition
     let currentIndex = scrollIndex
     do {
-      rows.push(this._renderRow(currentIndex, currentPos))
+      rows.push(this._renderRow(currentIndex))
       currentPos += rowHeights[currentIndex++] || estimatedRowHeight
     } while (currentPos < scrollTop + height)
 
@@ -86,7 +86,7 @@ class Virtue extends React.Component {
     )
   }
 
-  _renderRow(index, y) {
+  _renderRow(index) {
     const { rowRenderer } = this.props
 
     return (
