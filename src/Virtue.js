@@ -48,7 +48,6 @@ class Virtue extends React.Component {
     const { scrollIndex, rowHeights } = this.state
 
     delete otherProps.scrollIndex
-    delete otherProps.defaultHeight
 
     style.height = height + 'px'
     style.overflowY = 'scroll'
@@ -95,7 +94,7 @@ class Virtue extends React.Component {
   }
 
   _estimatePosition(scrollIndex) {
-    const defaultHeight = this.estimateAvgRowHeight()
+    const avgRowHeight = this.estimateAvgRowHeight()
     let { rowHeights } = this.state
 
     if (scrollIndex === 0) return 0
@@ -107,18 +106,18 @@ class Virtue extends React.Component {
     )
     return (
       computedHeights +
-      Math.floor(defaultHeight * (scrollIndex - computedIndexes.length))
+      Math.floor(avgRowHeight * (scrollIndex - computedIndexes.length))
     )
   }
 
   _estimateScrollIndex(scrollTop) {
-    const defaultHeight = this.estimateAvgRowHeight()
+    const avgRowHeight = this.estimateAvgRowHeight()
     let { rowHeights } = this.state
 
     let currentIndex = 0
     let remainingHeight = scrollTop
     do {
-      let rowHeight = rowHeights[currentIndex] || defaultHeight
+      let rowHeight = rowHeights[currentIndex] || avgRowHeight
       if (rowHeight > remainingHeight) {
         return currentIndex
       }
@@ -129,7 +128,9 @@ class Virtue extends React.Component {
 
   estimateAvgRowHeight() {
     let heights = Object.values(this.state.rowHeights)
-    if (heights.length === 0) return this.props.defaultHeight
+
+    // This value will get replaced as soon as the first row is measured
+    if (heights.length === 0) return 100
 
     return Math.round(heights.reduce((sum, h) => sum + h, 0) / heights.length)
   }
