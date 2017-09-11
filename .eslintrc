@@ -1,5 +1,8 @@
 {
-    "extends": "prettier-standard",
+    "extends": [
+        "prettier-standard",
+        "plugin:react/recommended"
+    ],
     "env": {
         "browser": true,
         "jest": true
@@ -8,6 +11,11 @@
         "babel",
         "react"
     ],
+    "settings": {
+        "react": {
+            "pragma": "React"
+        }
+    },
     "rules": {
         "eqeqeq": [
             "error",
