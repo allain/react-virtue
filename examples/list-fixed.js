@@ -15,7 +15,7 @@ module.exports = function run () {
     <Virtue
       rowCount={500}
       height={window.innerHeight}
-      scrollIndex={200}
+      startIndex={200}
       rowRenderer={fixedRow}
     />,
     document.getElementById('list-fixed')

@@ -7,14 +7,14 @@ class Virtue extends React.Component {
     super(props)
 
     this.state = {
-      scrollIndex: props.scrollIndex || 0,
+      startIndex: props.startIndex || 0,
       rowHeights: {},
       windowPosition: 0
     }
   }
 
   componentDidMount() {
-    let startPosition = this._estimatePosition(this.state.scrollIndex)
+    let startPosition = this._estimatePosition(this.state.startIndex)
     this.list.scrollTop = startPosition
     this.setState({
       windowPosition: startPosition
@@ -70,7 +70,7 @@ class Virtue extends React.Component {
           <div
             style={{
               position: 'relative',
-              top: this.state.windowPosition
+              top: this.state.windowPosition + 'px'
             }}>
             {rows}
           </div>
@@ -159,11 +159,12 @@ class Virtue extends React.Component {
   }
 }
 
-Virtue.proptypes = {
-  defaultheight: PropTypes.number,
-  height: PropTypes.number.isRequired,
+Virtue.propTypes = {
+  rowCount: PropTypes.number.isRequired,
   rowRenderer: PropTypes.func.isRequired,
-  scrollIndex: PropTypes.number
+  height: PropTypes.number.isRequired,
+  startIndex: PropTypes.number,
+  style: PropTypes.object
 }
 
 module.exports = Virtue

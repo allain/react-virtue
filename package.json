@@ -1,10 +1,12 @@
 {
   "name": "react-virtue",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist.js",
   "license": "MIT",
   "scripts": {
-    "build": "browserify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]",
+    "build": "npm run build-examples && npm run build-dist",
+    "build-dist": "browserify --external prop-types --external react --external react-height ./index.js -o ./dist.js -t [ babelify --presets [ es2015 react ] ]",
+    "build-examples": "browserify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]",
     "lint": "eslint src",
     "watch": "watchify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]"
   },
@@ -35,6 +37,7 @@
     "react-height": "^3.0.0"
   },
   "peerDependencies": {
-    "react": "^15.6.1"
+    "react": "^15.6.1",
+    "prop-types": "^15.5.10"
   }
 }
