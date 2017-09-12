@@ -1,6 +1,6 @@
 const React = require('react')
 const ReactDOM = require('react-dom')
-const Virtue = require('..')
+const Virtue = require('../src/Virtue')
 
 module.exports = function run() {
   const randomWords = {}
