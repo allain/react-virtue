@@ -7,14 +7,14 @@ class Virtue extends React.Component {
     super(props)
 
     this.state = {
-      startIndex: props.startIndex || 0,
+      scrollIndex: props.startIndex || 0,
       rowHeights: {},
       windowPosition: 0
     }
   }
 
   componentDidMount() {
-    let startPosition = this._estimatePosition(this.state.startIndex)
+    let startPosition = this._estimatePosition(this.state.scrollIndex)
     this.list.scrollTop = startPosition
     this.setState({
       windowPosition: startPosition
@@ -48,6 +48,7 @@ class Virtue extends React.Component {
     const { scrollIndex, rowHeights } = this.state
 
     delete otherProps.scrollIndex
+    delete otherProps.startIndex
 
     style.height = height + 'px'
     style.overflowY = 'scroll'
@@ -62,7 +63,10 @@ class Virtue extends React.Component {
     do {
       rows.push(this._renderRow(currentIndex))
       currentPos += rowHeights[currentIndex++] || estimatedRowHeight
-    } while (currentPos < scrollTop + height)
+    } while (
+      currentPos < scrollTop + height &&
+      currentIndex < this.props.rowCount
+    )
 
     return (
       <div ref={list => (this.list = list)} {...otherProps} style={style}>
@@ -116,14 +120,14 @@ class Virtue extends React.Component {
 
     let currentIndex = 0
     let remainingHeight = scrollTop
-    do {
+    while (currentIndex < this.props.rowCount) {
       let rowHeight = rowHeights[currentIndex] || avgRowHeight
       if (rowHeight > remainingHeight) {
         return currentIndex
       }
       currentIndex++
       remainingHeight -= rowHeight
-    } while (true)
+    }
   }
 
   estimateAvgRowHeight() {
@@ -165,6 +169,10 @@ Virtue.propTypes = {
   height: PropTypes.number.isRequired,
   startIndex: PropTypes.number,
   style: PropTypes.object
+}
+
+Virtue.defaultProps = {
+  startIndex: 0
 }
 
 module.exports = Virtue

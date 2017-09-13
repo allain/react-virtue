@@ -1,14 +1,17 @@
 {
   "name": "react-virtue",
   "version": "0.1.0",
-  "main": "src/Virtue.js",
+  "main": "dist.js",
   "license": "MIT",
   "scripts": {
-    "build:examples": "browserify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]",
+    "build": "npm run build-examples && npm run build-dist",
+    "build-dist": "babel src/Virtue.js --out-file=dist.js --presets=es2015,react",
+    "build-examples": "browserify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]",
     "lint": "eslint src",
-    "watch:examples": "watchify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]"
+    "watch": "watchify ./examples/examples.js -o ./examples/examples.dist.js -t [ babelify --presets [ es2015 react ] ]"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
