@@ -35,6 +35,7 @@
     "watchify": "^3.9.0"
   },
   "dependencies": {
+    "object-values": "^1.0.0",
     "react-height": "^3.0.0"
   },
   "peerDependencies": {

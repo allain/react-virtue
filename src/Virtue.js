@@ -1,6 +1,7 @@
 const React = require('react')
 const PropTypes = require('prop-types')
 const ReactHeight = require('react-height')
+const objectValues = require('object-values')
 
 class Virtue extends React.Component {
   constructor(props) {
@@ -131,7 +132,7 @@ class Virtue extends React.Component {
   }
 
   estimateAvgRowHeight() {
-    let heights = Object.values(this.state.rowHeights)
+    let heights = objectValues(this.state.rowHeights)
 
     // This value will get replaced as soon as the first row is measured
     if (heights.length === 0) return 100
